@@ -27,7 +27,6 @@ def get_current_user(
     db: Session = Depends(get_db)
 ) -> User:
     
-    passw = pass_flow.password
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
