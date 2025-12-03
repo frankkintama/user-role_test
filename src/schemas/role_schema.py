@@ -18,8 +18,3 @@ class RoleOut(BaseModel): #lấy role
     class Config:
         from_attributes = True
 
-class AssignRoleRequest(BaseModel):
-    total_ids: List[UUID] = Field(..., min_items=1)
-
-class RemoveRoleRequest(BaseModel):
-    total_ids: List[UUID] = Field(..., min_items=1)

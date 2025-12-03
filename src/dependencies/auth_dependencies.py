@@ -9,7 +9,7 @@ from uuid import UUID
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
-bearer_scheme = HTTPBearer(auto_error=True)
+bearer_scheme = HTTPBearer()
 
 
 def get_token(credentials: HTTPAuthorizationCredentials = Depends(HTTPBearer())):
@@ -23,11 +23,9 @@ def get_payload(token: str = Depends(get_token)):
 def get_current_user(
     token: str = Depends(get_token),
     payload: dict = Depends(get_payload),
-    pass_flow: str = Depends(oauth2_scheme),
     db: Session = Depends(get_db)
 ) -> User:
     
-    passw = pass_flow.password
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -67,4 +65,14 @@ def get_current_user(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Inactive user"
         )   
+    
+    user_roles = user.roles
+
+    permission_set = set()
+    for role in user_roles:
+        for permission in role.permissions:
+            permission_set.add(permission.codename)
+
+    user.permissions = permission_set
+
     return user

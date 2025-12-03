@@ -3,9 +3,9 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from api.configs.db import get_db
-from api.configs.auth import create_access_token, verify_token
+from api.configs.auth import create_access_token
 from src.controller.auth_controller import blacklist_token
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from src.schemas.auth_schema import UserRegister, Token
 from src.schemas.user_schema import UserOut
 from src.controller.auth_controller import (
@@ -16,7 +16,6 @@ from src.controller.auth_controller import (
 from src.controller.user_controller import get_user_by_name
 from src.dependencies.auth_dependencies import get_current_user, get_token, get_payload
 from src.models.user_model import User
-from api.configs.auth import ACCESS_TOKEN_EXPIRE_MINUTES
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 

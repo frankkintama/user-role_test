@@ -39,6 +39,6 @@ def is_token_blacklisted(db: Session, token: str) -> bool:
     return result is not None
 
 
-def cleanup_expired_tokens(db: Session) -> None:
-    db.query(TokenBlacklist).filter(TokenBlacklist.expires_at < datetime.now(timezone.utc)).delete(synchronize_session=False)
-    db.commit()
+#def cleanup_expired_tokens(db: Session) -> None:
+#   db.query(TokenBlacklist).filter(TokenBlacklist.expires_at < datetime.now(timezone.utc)).delete(synchronize_session=False)
+#   db.commit()

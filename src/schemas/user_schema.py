@@ -30,18 +30,6 @@ class UserOut(BaseModel): #lấyuser
     created_at: datetime
     updated_at: datetime
 
-class RegisterRequest(BaseModel):
-    email: EmailStr
-    password: str = Field(..., min_length=6)
-    
-class LoginRequest(BaseModel):
-    email: EmailStr
-    password: str
-
-class LogOutRequest(BaseModel):
-    id: str
-    email: str
-
 
 class Config:
     from_attributes = True
