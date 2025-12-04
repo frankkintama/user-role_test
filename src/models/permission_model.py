@@ -1,5 +1,5 @@
 from api.configs.db import Base
-from sqlalchemy import Column, String, DateTime, Boolean, text
+from sqlalchemy import Column, String, DateTime, text
 from sqlalchemy.orm import relationship, Mapped
 from sqlalchemy.dialects.postgresql import UUID as PostgresUUID
 from typing import List, TYPE_CHECKING
@@ -7,19 +7,18 @@ from typing import List, TYPE_CHECKING
 from uuid import uuid4
 
 if TYPE_CHECKING:
-    from src.models.user_model import User
-    from src.models.permission_model import Permission
+    from src.models.role_model import Role
 
-class Role(Base):
-    __tablename__ = "roles"
+class Permission(Base):
+    __tablename__ = "permissions"
 
     id = Column(
         PostgresUUID(as_uuid=True), 
         primary_key=True, 
         default=uuid4)
     
-    role_name = Column(String(255), unique=True, nullable=False)
-    is_default = Column(Boolean, default=False, nullable=False)
+    permission_name = Column(String(255), unique=True, nullable=False)
+    description = Column(String(500), nullable=True)
 
     created_at = Column(
         DateTime(timezone=True), 
@@ -32,5 +31,4 @@ class Role(Base):
         onupdate=text("NOW()"), 
         nullable=False)
     
-    users: Mapped[List["User"]] = relationship("User", secondary="user_roles", back_populates="roles")
-    permissions: Mapped[List["Permission"]] = relationship("Permission", secondary="role_permissions", back_populates="roles")
+    roles: Mapped[List["Role"]] = relationship("Role", secondary="role_permissions", back_populates="permissions")

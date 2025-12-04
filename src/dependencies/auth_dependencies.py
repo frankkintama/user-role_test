@@ -9,7 +9,7 @@ from uuid import UUID
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
-bearer_scheme = HTTPBearer(auto_error=True)
+bearer_scheme = HTTPBearer()
 
 
 def get_token(credentials: HTTPAuthorizationCredentials = Depends(HTTPBearer())):
@@ -23,7 +23,6 @@ def get_payload(token: str = Depends(get_token)):
 def get_current_user(
     token: str = Depends(get_token),
     payload: dict = Depends(get_payload),
-    pass_flow: str = Depends(oauth2_scheme),
     db: Session = Depends(get_db)
 ) -> User:
     
@@ -43,11 +42,11 @@ def get_current_user(
     if payload is None:
         raise credentials_exception
     
-    username: str = payload.get("sub")
+    user_name: str = payload.get("sub")
     user_id: str = payload.get("user_id")
     token_type: str = payload.get("type")
     
-    if username is None or user_id is None:
+    if user_name is None or user_id is None:
         raise credentials_exception
     
     if token_type != "access":

@@ -8,14 +8,14 @@ from fastapi import HTTPException
 def create_user(db: Session, user_in: UserCreate) -> User:
 
     existing = db.query(User).filter(
-        (User.username == user_in.username) | (User.email == user_in.email)
+        (User.user_name == user_in.user_name) | (User.email == user_in.email)
     ).first()
     
     if existing:
         raise HTTPException(status_code=400, detail="username or email already exists")
 
     user = User(
-        username=user_in.username,
+        user_name=user_in.user_name,
         email=user_in.email,
         password=user_in.password,  
         phone=user_in.phone,
@@ -32,8 +32,8 @@ def get_user(db: Session, user_id: UUID) -> Optional[User]:
     return db.query(User).filter(User.id == user_id).first()
 
 
-def get_user_by_name(db: Session, username: str) -> Optional[User]:
-    return db.query(User).filter(User.username == username).first()
+def get_user_by_name(db: Session, user_name: str) -> Optional[User]:
+    return db.query(User).filter(User.user_name == user_name).first()
 
 
 
@@ -44,8 +44,8 @@ def list_users(db: Session, skip: int = 0, limit: int = 100) -> List[User]:
 def update_user(db: Session, user: User, user_in: UserUpdate) -> User:
     updated = False
     
-    if user_in.username is not None:
-        user.username = user_in.username
+    if user_in.user_name is not None:
+        user.user_name = user_in.user_name
         updated = True
     if user_in.email is not None:
         user.email = user_in.email
