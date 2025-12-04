@@ -18,7 +18,7 @@ class User(Base):
         primary_key=True, 
         default=uuid4)
     
-    username = Column(String(255), unique=True, nullable=False)
+    user_name = Column(String(255), unique=True, nullable=False)
     email = Column(String(255), unique=True, nullable=False)
     password = Column(String(255), nullable=False)
 

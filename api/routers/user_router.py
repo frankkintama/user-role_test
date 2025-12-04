@@ -12,7 +12,6 @@ from src.controller.user_controller import (
 )
 from src.controller.role_controller import (get_role, assign_users_with_role, remove_role_from_users, get_users_by_role)
 from src.dependencies.auth_dependencies import get_current_user
-from src.dependencies.permission_check_dependencies import require_permission
 from src.dependencies.role_check_dependencies import require_role
 from src.models.user_model import User
 router = APIRouter(prefix="/users", tags=["Users"])
@@ -24,7 +23,7 @@ def create_user_endpoint(
     db: Session = Depends(get_db), 
     current_user: User = Depends(get_current_user)
 ):
-    existing = get_user_by_name(db, user_in.username)
+    existing = get_user_by_name(db, user_in.user_name)
     if existing:
         raise HTTPException(status_code=400, detail="User already exists")
     
@@ -72,7 +71,7 @@ def delete_user_byid_endpoint(user_id: UUID, db: Session = Depends(get_db)):
     return None
 
 
-@router.post("/assign_role_to_users", response_model=RoleOut)
+@router.post("/assign_role_to_users")
 def assign_role_to_user_endpoint(
     role_id: UUID,
     user_ids: List[UUID] = Body(..., min_length=1),
@@ -89,22 +88,26 @@ def assign_role_to_user_endpoint(
         raise HTTPException(status_code=404, detail=f"Users not found: {list(missing_ids)}")
     
     role = assign_users_with_role(db, role, role_id, user_ids)
-    return role
+    return {
+        "message": f"Successfully assigned role to users {user_ids}",
+    }
 
 
-@router.delete("/remove_role_from_users", response_model=RoleOut)
+
+@router.delete("/remove_role_from_users")
 def remove_role_from_users_endpoint(
     role_id: UUID,
     user_ids: List[UUID] = Body(..., min_length=1),
     db: Session = Depends(get_db),
-    current_role: User = Depends(require_role("Admin")),
-    current_permission: User = Depends(require_permission("remove_role_from_users"))
+    current_user_role: User = Depends(require_role(["Admin"])),
 ):
     role = get_role(db, role_id)
     if not role:
         raise HTTPException(status_code=404, detail="Role not found")
     role = remove_role_from_users(db, role, role_id, user_ids)
-    return role
+    return {
+        "message": f"Successfully removed role from from users {user_ids}"
+    }
 
 
 @router.get("/get_users_with_role", response_model=List[UserOut])

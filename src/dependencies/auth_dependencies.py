@@ -42,11 +42,11 @@ def get_current_user(
     if payload is None:
         raise credentials_exception
     
-    username: str = payload.get("sub")
+    user_name: str = payload.get("sub")
     user_id: str = payload.get("user_id")
     token_type: str = payload.get("type")
     
-    if username is None or user_id is None:
+    if user_name is None or user_id is None:
         raise credentials_exception
     
     if token_type != "access":

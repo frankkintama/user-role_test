@@ -16,7 +16,6 @@ from src.controller.permission_controller import (
 )
 from src.controller.role_controller import get_role
 from src.dependencies.auth_dependencies import get_current_user
-from src.dependencies.permission_check_dependencies import require_permission
 from src.dependencies.role_check_dependencies import require_role
 
 router = APIRouter(prefix="/permissions", tags=["Permissions"])
@@ -28,7 +27,7 @@ def create_permission_endpoint(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    existing = get_permission_by_name(db, permission_in.permissionname)
+    existing = get_permission_by_name(db, permission_in.permission_name)
     if existing:
         raise HTTPException(status_code=400, detail="Permission already exists")
     
@@ -65,8 +64,8 @@ def update_permission_endpoint(
     if not permission:
         raise HTTPException(status_code=404, detail="Permission not found")
     
-    if permission_in.permissionname is not None:
-        existing = get_permission_by_name(db, permission_in.permissionname)
+    if permission_in.permission_name is not None:
+        existing = get_permission_by_name(db, permission_in.permission_name)
         if existing and existing.id != permission_id:
             raise HTTPException(status_code=400, detail="Permission name already exists")
     
@@ -84,7 +83,8 @@ def delete_permission_endpoint(permission_id: UUID, db: Session = Depends(get_db
     return None
 
 
-@router.post("/assign_role_with_permissions/", response_model=RoleOut)
+
+@router.post("/assign_role_with_permissions/")
 def assign_role_with_permission_endpoint(
     role_id: UUID,
     permission_ids: List[UUID] = Body(..., min_length=1),
@@ -104,16 +104,18 @@ def assign_role_with_permission_endpoint(
         )
     
     role = assign_permissions_to_role(db, role, role_id, permission_ids)
-    return role
+
+    return {
+        "message": f"Successfully assigned permissions for role {role_id}",
+    }
 
 
-@router.delete("/remove_role_from_permissions/", response_model=RoleOut)
+
+@router.delete("/remove_role_from_permissions/")
 def remove_permissions_from_role_endpoint(
     role_id: UUID,
     permission_ids: List[UUID] = Body(..., min_length=1),
-    db: Session = Depends(get_db),
-    current_role: User = Depends(require_role("Admin")),
-    current_permission: User = Depends(require_permission("remove_role_from_permissions"))
+    db: Session = Depends(get_db)
 ):
     role = get_role(db, role_id)
     if not role:
@@ -129,7 +131,10 @@ def remove_permissions_from_role_endpoint(
         )
     
     role = remove_permissions_from_role(db, role, role_id, permission_ids)
-    return role
+
+    return {
+        "message": f"Successfully removed permissions from role {role_id}",
+    }
 
 
 @router.get("/get_permissons_with_role", response_model=List[PermissionOut])

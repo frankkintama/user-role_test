@@ -5,7 +5,7 @@ from typing import Optional, List
 from pydantic import Field
 
 class UserCreate(BaseModel):
-    username: str = Field(..., min_length=3, max_length=64)
+    user_name: str = Field(..., min_length=3, max_length=64)
     email: EmailStr
     password: str = Field(..., min_length=6)
     phone: Optional[str] = Field(None, pattern=r'^\d{10}$')
@@ -13,7 +13,7 @@ class UserCreate(BaseModel):
 
 
 class UserUpdate(BaseModel):
-    username: Optional[str] = Field(None, min_length=3, max_length=64)
+    user_name: Optional[str] = Field(None, min_length=3, max_length=64)
     email: Optional[EmailStr] = None
     password: Optional[str] = Field(None, min_length=6)
     phone: Optional[str] = Field(None, pattern=r'^\d{10}$')
@@ -22,7 +22,7 @@ class UserUpdate(BaseModel):
 
 class UserOut(BaseModel): #lấyuser
     id: UUID
-    username: str
+    user_name: str
     email: EmailStr
     phone: Optional[str] = None
     date_of_birth: Optional[date] = None

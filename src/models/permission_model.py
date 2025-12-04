@@ -17,7 +17,7 @@ class Permission(Base):
         primary_key=True, 
         default=uuid4)
     
-    permissionname = Column(String(255), unique=True, nullable=False)
+    permission_name = Column(String(255), unique=True, nullable=False)
     description = Column(String(500), nullable=True)
 
     created_at = Column(

@@ -8,9 +8,7 @@ from uuid import UUID
 from fastapi import HTTPException
 
 def create_role(db: Session, role_in: RoleCreate) -> Role:
-    role = Role(
-        rolename=role_in.rolename,
-    )
+    role = Role(role_name=role_in.role_name,)
     db.add(role)
     db.commit()
     db.refresh(role)
@@ -21,8 +19,8 @@ def get_role(db: Session, role_id: UUID) -> Optional[Role]:
     return db.query(Role).filter(Role.id == role_id).first()
 
 
-def get_role_by_name(db: Session, rolename: str) -> Optional[Role]:
-    return db.query(Role).filter(Role.rolename == rolename).first()
+def get_role_by_name(db: Session, role_name: str) -> Optional[Role]:
+    return db.query(Role).filter(Role.role_name == role_name).first()
 
 
 def list_roles(db: Session, skip: int = 0, limit: int = 100) -> List[Role]:
@@ -32,8 +30,8 @@ def list_roles(db: Session, skip: int = 0, limit: int = 100) -> List[Role]:
 def update_role(db: Session, role: Role, role_in: RoleUpdate) -> Role:
     updated = False
     
-    if role_in.rolename is not None:
-        role.rolename = role_in.rolename
+    if role_in.role_name is not None:
+        role.role_name = role_in.role_name
         updated = True
         
     if updated:

@@ -18,7 +18,7 @@ class Role(Base):
         primary_key=True, 
         default=uuid4)
     
-    rolename = Column(String(255), unique=True, nullable=False)
+    role_name = Column(String(255), unique=True, nullable=False)
     is_default = Column(Boolean, default=False, nullable=False)
 
     created_at = Column(

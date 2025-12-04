@@ -22,7 +22,7 @@ router = APIRouter(prefix="/auth", tags=["Auth"])
 
 @router.post("/register", response_model=UserOut, status_code=status.HTTP_201_CREATED)
 def register(user_data: UserRegister, db: Session = Depends(get_db)):
-    existing_user = get_user_by_name(db, user_data.username)
+    existing_user = get_user_by_name(db, user_data.user_name)
     if existing_user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -54,7 +54,7 @@ def login(
             headers={"WWW-Authenticate": "Bearer"},
         )
     
-    access_token = create_access_token(data={"sub": user.username, "user_id": str(user.id)})
+    access_token = create_access_token(data={"sub": user.user_name, "user_id": str(user.id)})
 
     return {
         "access_token": access_token,

@@ -24,7 +24,7 @@ def create_role_endpoint(
     db: Session = Depends(get_db), 
     current_user: User = Depends(get_current_user)
 ):
-    existing = get_role_by_name(db, role_in.rolename)
+    existing = get_role_by_name(db, role_in.role_name)
     if existing:
         raise HTTPException(status_code=400, detail="Role already exists")
     
@@ -62,8 +62,8 @@ def update_role_endpoint(
     if not role:
         raise HTTPException(status_code=404, detail="Role not found")
     
-    if role_in.rolename is not None:
-        existing = get_role(db, role_in.rolename)
+    if role_in.role_name is not None:
+        existing = get_role(db, role_in.role_name)
         if existing and existing.id != role_id:
             raise HTTPException(status_code=400, detail="Role name already exists")
         

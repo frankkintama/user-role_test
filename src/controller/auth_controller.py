@@ -10,7 +10,7 @@ def create_user_account(db: Session, user_data: UserRegister) -> User:
     hashed_password = get_password_hash(user_data.password)
     
     user = User(
-        username=user_data.username,
+        user_name=user_data.user_name,
         email=user_data.email,
         password=hashed_password,
     )
@@ -20,8 +20,8 @@ def create_user_account(db: Session, user_data: UserRegister) -> User:
     return user
 
 
-def authenticate_user(db: Session, username: str, password: str) -> Optional[User]:
-    user = db.query(User).filter(User.username == username).first()
+def authenticate_user(db: Session, user_name: str, password: str) -> Optional[User]:
+    user = db.query(User).filter(User.user_name == user_name).first()
     if not user:
         return None
     if not verify_password(password, user.password):
