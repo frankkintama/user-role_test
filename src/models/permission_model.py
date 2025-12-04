@@ -5,15 +5,16 @@ from sqlalchemy.dialects.postgresql import UUID as PostgresUUID
 
 from uuid import uuid4
 
-class Role(Base):
-    __tablename__ = "roles"
+class Permission(Base):
+    __tablename__ = "permissions"
 
     id = Column(
         PostgresUUID(as_uuid=True), 
         primary_key=True, 
         default=uuid4)
     
-    rolename = Column(String(255), unique=True, nullable=False)
+    name = Column(String(255), unique=True, nullable=False)
+    description = Column(String(500), nullable=True)
 
     created_at = Column(
         DateTime(timezone=True), 
@@ -26,5 +27,4 @@ class Role(Base):
         onupdate=text("NOW()"), 
         nullable=False)
     
-    users = relationship("User", secondary="user_roles", back_populates="roles")
-    permissions = relationship("Permission", secondary="role_permissions", back_populates="roles")
+    roles = relationship("Role", secondary="role_permissions", back_populates="permissions")
