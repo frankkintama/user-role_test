@@ -10,7 +10,7 @@ from src.models.role_permission_model import RolePermission
 
 def create_permission(db: Session, permission_in: PermissionCreate) -> Permission:
     permission = Permission(
-        name=permission_in.name,
+        name=permission_in.permissionname,
         description=permission_in.description
     )
     db.add(permission)
@@ -24,7 +24,7 @@ def get_permission(db: Session, permission_id: UUID) -> Permission:
 
 
 def get_permission_by_name(db: Session, name: str) -> Permission:
-    return db.query(Permission).filter(Permission.name == name).first()
+    return db.query(Permission).filter(Permission.permissionname == name).first()
 
 
 def list_permissions(db: Session, skip: int = 0, limit: int = 50) -> List[Permission]:
@@ -32,8 +32,8 @@ def list_permissions(db: Session, skip: int = 0, limit: int = 50) -> List[Permis
 
 
 def update_permission(db: Session, permission: Permission, permission_in: PermissionUpdate) -> Permission:
-    if permission_in.name is not None:
-        permission.name = permission_in.name
+    if permission_in.permissionname is not None:
+        permission.permissionname = permission_in.permissionname
     if permission_in.description is not None:
         permission.description = permission_in.description
     

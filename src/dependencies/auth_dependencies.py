@@ -66,13 +66,5 @@ def get_current_user(
             detail="Inactive user"
         )   
     
-    user_roles = user.roles
-
-    permission_set = set()
-    for role in user_roles:
-        for permission in role.permissions:
-            permission_set.add(permission.codename)
-
-    user.permissions = permission_set
 
     return user

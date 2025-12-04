@@ -16,6 +16,8 @@ from src.controller.permission_controller import (
 )
 from src.controller.role_controller import get_role
 from src.dependencies.auth_dependencies import get_current_user
+from src.dependencies.permission_check_dependencies import require_permission
+from src.dependencies.role_check_dependencies import require_role
 
 router = APIRouter(prefix="/permissions", tags=["Permissions"])
 
@@ -26,7 +28,7 @@ def create_permission_endpoint(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    existing = get_permission_by_name(db, permission_in.name)
+    existing = get_permission_by_name(db, permission_in.permissionname)
     if existing:
         raise HTTPException(status_code=400, detail="Permission already exists")
     
@@ -63,8 +65,8 @@ def update_permission_endpoint(
     if not permission:
         raise HTTPException(status_code=404, detail="Permission not found")
     
-    if permission_in.name is not None:
-        existing = get_permission_by_name(db, permission_in.name)
+    if permission_in.permissionname is not None:
+        existing = get_permission_by_name(db, permission_in.permissionname)
         if existing and existing.id != permission_id:
             raise HTTPException(status_code=400, detail="Permission name already exists")
     
@@ -109,7 +111,9 @@ def assign_role_with_permission_endpoint(
 def remove_permissions_from_role_endpoint(
     role_id: UUID,
     permission_ids: List[UUID] = Body(..., min_length=1),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_role: User = Depends(require_role("Admin")),
+    current_permission: User = Depends(require_permission("remove_role_from_permissions"))
 ):
     role = get_role(db, role_id)
     if not role:
