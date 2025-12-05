@@ -15,6 +15,9 @@ from src.controller.role_controller import (
     update_role, delete_role,
 )
 from src.dependencies.auth_dependencies import get_current_user
+from src.dependencies.role_check_dependencies import get_role_dependency, require_role
+
+
 router = APIRouter(prefix="/roles", tags=["Roles"])
 
 
@@ -34,10 +37,10 @@ def create_role_endpoint(
 
 
 @router.get("/get", response_model=RoleOut)
-def get_role_endpoint(role_id: UUID, db: Session = Depends(get_db)):
-    role = get_role(db, role_id)
-    if not role:
-        raise HTTPException(status_code=404, detail="Role not found")    
+def get_role_endpoint(
+    role: Role = Depends(get_role_dependency),  
+    db: Session = Depends(get_db)
+): 
     return role
 
 
@@ -54,17 +57,13 @@ def list_roles_endpoint(
 
 @router.put("/update", response_model=RoleOut)
 def update_role_endpoint(
-    role_id: UUID, 
     role_in: RoleUpdate, 
+    role: Role = Depends(get_role_dependency),
     db: Session = Depends(get_db)
 ):
-    role = get_role(db, role_id)
-    if not role:
-        raise HTTPException(status_code=404, detail="Role not found")
-    
     if role_in.role_name is not None:
         existing = get_role(db, role_in.role_name)
-        if existing and existing.id != role_id:
+        if existing and existing.id != role.id:
             raise HTTPException(status_code=400, detail="Role name already exists")
         
     role = update_role(db, role, role_in)
@@ -73,9 +72,9 @@ def update_role_endpoint(
 
 
 @router.delete("/delete", status_code=status.HTTP_204_NO_CONTENT)
-def delete_role_endpoint(role_id: UUID, db: Session = Depends(get_db)):
-    role = get_role(db, role_id)
-    if not role:
-        raise HTTPException(status_code=404, detail="Role not found")
+def delete_role_endpoint(
+    role: Role = Depends(get_role_dependency),
+    db: Session = Depends(get_db)
+):
     delete_role(db, role)
     return None

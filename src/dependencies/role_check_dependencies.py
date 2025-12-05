@@ -1,8 +1,28 @@
-from fastapi import Depends, HTTPException, status
+
+from fastapi import Depends, HTTPException, status, Path
+from sqlalchemy.orm import Session
 from typing import List, Set, Callable
-from api.configs.db import get_db
 from src.models.user_model import User
+from src.models.role_model import Role
 from src.dependencies.auth_dependencies import get_current_user
+from api.configs.db import get_db
+from uuid import UUID
+from src.controller.role_controller import get_role
+
+
+
+def get_role_dependency(
+    role_id: UUID,
+    db: Session = Depends(get_db)
+) -> Role:
+    
+    role = get_role(db, role_id)
+    if not role:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Role not found"
+        )
+    return role
 
 
 

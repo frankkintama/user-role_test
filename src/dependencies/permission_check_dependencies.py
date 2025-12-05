@@ -1,8 +1,27 @@
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Path
+from sqlalchemy.orm import Session
 from typing import List, Set, Callable
-from api.configs.db import get_db
 from src.models.user_model import User
+from src.models.permission_model import Permission
 from src.dependencies.auth_dependencies import get_current_user
+from api.configs.db import get_db
+from uuid import UUID
+from src.controller.permission_controller import get_permission
+
+
+
+def get_permission_dependency(
+    permission_id: UUID,
+    db: Session = Depends(get_db)
+) -> Permission:
+    
+    permission = get_permission(db, permission_id)
+    if not permission:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Permission not found"
+        )
+    return permission
 
 
 

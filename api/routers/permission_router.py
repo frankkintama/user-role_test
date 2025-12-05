@@ -1,13 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status, Body
 from sqlalchemy.orm import Session
-from src.models.user_model import User
 from typing import List
 from uuid import UUID
 
 from api.configs.db import get_db
-from src.schemas.permission_schema import PermissionCreate, PermissionUpdate, PermissionOut
-from src.schemas.role_schema import RoleOut
+from src.models.user_model import User
+from src.models.role_model import Role
 from src.models.permission_model import Permission
+from src.schemas.permission_schema import PermissionCreate, PermissionUpdate, PermissionOut
 from src.controller.permission_controller import (
     create_permission, get_permission, get_permission_by_name,
     list_permissions, update_permission, delete_permission,
@@ -16,7 +16,9 @@ from src.controller.permission_controller import (
 )
 from src.controller.role_controller import get_role
 from src.dependencies.auth_dependencies import get_current_user
-from src.dependencies.role_check_dependencies import require_role
+from src.dependencies.role_check_dependencies import get_role_dependency, require_role
+from src.dependencies.permission_check_dependencies import get_permission_dependency, require_permission
+
 
 router = APIRouter(prefix="/permissions", tags=["Permissions"])
 
@@ -36,11 +38,9 @@ def create_permission_endpoint(
 
 
 @router.get("/get", response_model=PermissionOut)
-def get_permission_endpoint(permission_id: UUID, db: Session = Depends(get_db)):
-    permission = get_permission(db, permission_id)
-    if not permission:
-        raise HTTPException(status_code=404, detail="Permission not found")
-    
+def get_permission_endpoint(
+    permission: Permission = Depends(get_permission_dependency)
+):
     return permission
 
 
@@ -54,19 +54,16 @@ def list_permissions_endpoint(
     return permissions
 
 
+
 @router.put("/update", response_model=PermissionOut)
 def update_permission_endpoint(
-    permission_id: UUID,
     permission_in: PermissionUpdate,
+    permission: Permission = Depends(get_permission_dependency),
     db: Session = Depends(get_db)
 ):
-    permission = get_permission(db, permission_id)
-    if not permission:
-        raise HTTPException(status_code=404, detail="Permission not found")
-    
     if permission_in.permission_name is not None:
         existing = get_permission_by_name(db, permission_in.permission_name)
-        if existing and existing.id != permission_id:
+        if existing and existing.id != permission.id:
             raise HTTPException(status_code=400, detail="Permission name already exists")
     
     permission = update_permission(db, permission, permission_in)
@@ -74,11 +71,10 @@ def update_permission_endpoint(
 
 
 @router.delete("/delete", status_code=status.HTTP_204_NO_CONTENT)
-def delete_permission_endpoint(permission_id: UUID, db: Session = Depends(get_db)):
-    permission = get_permission(db, permission_id)
-    if not permission:
-        raise HTTPException(status_code=404, detail="Permission not found")
-    
+def delete_permission_endpoint(
+    permission: Permission = Depends(get_permission_dependency), 
+    db: Session = Depends(get_db)
+):
     delete_permission(db, permission)
     return None
 
@@ -86,13 +82,10 @@ def delete_permission_endpoint(permission_id: UUID, db: Session = Depends(get_db
 
 @router.post("/assign_role_with_permissions/")
 def assign_role_with_permission_endpoint(
-    role_id: UUID,
     permission_ids: List[UUID] = Body(..., min_length=1),
+    role: Role = Depends(get_role_dependency),
     db: Session = Depends(get_db)
 ):
-    role = get_role(db, role_id)
-    if not role:
-        raise HTTPException(status_code=404, detail="Role not found")
     
     permissions = db.query(Permission).filter(Permission.id.in_(permission_ids)).all()
     if len(permissions) != len(permission_ids):
@@ -103,33 +96,32 @@ def assign_role_with_permission_endpoint(
             detail=f"Permissions not found: {list(missing_ids)}"
         )
     
-    role = assign_permissions_to_role(db, role, role_id, permission_ids)
+    role = assign_permissions_to_role(db, role, permission_ids)
     return {
-        "message": f"Successfully assigned permissions for role {role_id}",
+        "message": f"Successfully assigned permissions for role {role.id}",
     }
 
 
 
 @router.delete("/remove_role_from_permissions/")
 def remove_permissions_from_role_endpoint(
-    role_id: UUID,
     permission_ids: List[UUID] = Body(..., min_length=1),
-    db: Session = Depends(get_db)
+    role: Role = Depends(get_role_dependency),
+    db: Session = Depends(get_db),
+    current_user_role: User = Depends(require_role(["Admin"])),
+    current_user_permission: User = Depends(require_permission([""]))
 ):
-    role = get_role(db, role_id)
-    if not role:
-        raise HTTPException(status_code=404, detail="Role not found")
        
     role = remove_permissions_from_role(db, role, permission_ids)
     return {
-        "message": f"Successfully removed permissions from role {role_id}",
+        "message": f"Successfully removed permissions from role {role.id}",
     }
 
 
 @router.get("/get_permissons_with_role", response_model=List[PermissionOut])
-def get_permissions_by_role_endpoint(role_id: UUID, db: Session = Depends(get_db)):
-    role = get_role(db, role_id)
-    if not role:
-        raise HTTPException(status_code=404, detail="Role not found")
+def get_permissions_by_role_endpoint(
+    role: Role = Depends(get_role_dependency), 
+    db: Session = Depends(get_db)
+):
     permissions = get_permissions_by_role(db, role)
     return permissions
