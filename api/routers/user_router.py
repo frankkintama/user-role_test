@@ -15,8 +15,8 @@ from src.controller.user_controller import (
 from src.controller.role_controller import (get_role, assign_users_with_role, remove_role_from_users, get_users_by_role)
 from src.dependencies.auth_dependencies import get_current_user
 from src.dependencies.user_dependencies import get_user_dependency
-from src.dependencies.role_check_dependencies import get_role_dependency, require_role
-from src.dependencies.permission_check_dependencies import require_permission
+from dependencies.role_dependencies import get_role_dependency, require_role
+from dependencies.permission_dependencies import require_permission
 from src.models.user_model import User
 
 

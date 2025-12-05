@@ -16,8 +16,8 @@ from src.controller.permission_controller import (
 )
 from src.controller.role_controller import get_role
 from src.dependencies.auth_dependencies import get_current_user
-from src.dependencies.role_check_dependencies import get_role_dependency, require_role
-from src.dependencies.permission_check_dependencies import get_permission_dependency, require_permission
+from dependencies.role_dependencies import get_role_dependency, require_role
+from dependencies.permission_dependencies import get_permission_dependency, require_permission
 
 
 router = APIRouter(prefix="/permissions", tags=["Permissions"])

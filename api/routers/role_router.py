@@ -15,7 +15,7 @@ from src.controller.role_controller import (
     update_role, delete_role,
 )
 from src.dependencies.auth_dependencies import get_current_user
-from src.dependencies.role_check_dependencies import get_role_dependency, require_role
+from dependencies.role_dependencies import get_role_dependency, require_role
 
 
 router = APIRouter(prefix="/roles", tags=["Roles"])
