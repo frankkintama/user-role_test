@@ -79,4 +79,3 @@ def delete_role_endpoint(role_id: UUID, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Role not found")
     delete_role(db, role)
     return None
-

@@ -47,7 +47,7 @@ def delete_role(db: Session, role: Role) -> None:
     db.commit()
 
 
-def assign_users_with_role(db: Session, role: Role, role_id: UUID, user_ids: List[UUID]) -> Role:
+def assign_users_with_role(db: Session, role: Role, user_ids: List[UUID]) -> Role:
     # Assign roles (avoid duplicates)
     # client gửi request gán role cho 1 hoặc nhiều user, hàm kiểm tra id của user
     # Kiểm tra db bảng user_roles trong UserRole lấy giá trị id của user và role đầu tiên nếu tồn tại
@@ -55,27 +55,24 @@ def assign_users_with_role(db: Session, role: Role, role_id: UUID, user_ids: Lis
     for user_id in user_ids:
         existing = db.query(UserRole).filter(
             UserRole.user_id == user_id,
-            UserRole.role_id == role_id
+            UserRole.role_id == role.id
         ).first()
         
         if not existing:
-            user_role = UserRole(user_id=user_id, role_id=role_id)
+            user_role = UserRole(user_id=user_id, role_id=role.id)
             # bỏ db.add() ở đây để db.add() hoạt động trong vòng lặp, ghi id_role cho mỗi id_user không tìm thấy trong bảng trung gian user_roles
             db.add(user_role)
     
     db.commit()
-    db.refresh(role)
     return role
 
 
 
-def remove_role_from_users(db: Session, role: Role, role_id: UUID, user_ids: List[UUID]) -> Role:
-    db.query(UserRole).filter(UserRole.role_id == role_id, UserRole.user_id.in_(user_ids)).delete() 
+def remove_role_from_users(db: Session, role: Role, user_ids: List[UUID]) -> Role:
+    db.query(UserRole).filter(UserRole.role_id == role.id, UserRole.user_id.in_(user_ids)).delete() 
     db.commit()
-    db.refresh(role)
     return role
     
 
 def get_users_by_role(db: Session, role:Role) -> List[User]:
     return role.users
-

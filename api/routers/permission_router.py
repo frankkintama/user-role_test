@@ -104,7 +104,6 @@ def assign_role_with_permission_endpoint(
         )
     
     role = assign_permissions_to_role(db, role, role_id, permission_ids)
-
     return {
         "message": f"Successfully assigned permissions for role {role_id}",
     }
@@ -120,18 +119,8 @@ def remove_permissions_from_role_endpoint(
     role = get_role(db, role_id)
     if not role:
         raise HTTPException(status_code=404, detail="Role not found")
-    
-    permissions = db.query(Permission).filter(Permission.id.in_(permission_ids)).all()
-    if len(permissions) != len(permission_ids):
-        found_ids = {p.id for p in permissions}
-        missing_ids = set(permission_ids) - found_ids
-        raise HTTPException(
-            status_code=404,
-            detail=f"Permissions not found: {list(missing_ids)}"
-        )
-    
-    role = remove_permissions_from_role(db, role, role_id, permission_ids)
-
+       
+    role = remove_permissions_from_role(db, role, permission_ids)
     return {
         "message": f"Successfully removed permissions from role {role_id}",
     }

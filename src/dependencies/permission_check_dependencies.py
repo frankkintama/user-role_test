@@ -1,9 +1,9 @@
-
 from fastapi import Depends, HTTPException, status
 from typing import List, Set, Callable
 from api.configs.db import get_db
 from src.models.user_model import User
 from src.dependencies.auth_dependencies import get_current_user
+
 
 
 def get_user_permissions(user: User) -> Set[str]:
@@ -18,3 +18,15 @@ def get_user_permissions(user: User) -> Set[str]:
     return permission_set
 
 
+def require_permission(permission_names: List[str]) -> Callable:    
+    def permission_checker(current_user: User = Depends(get_current_user)) -> User:
+        user_permissions = get_user_permissions(current_user)
+
+        if not any(permission in user_permissions for permission in permission_names):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"User must have at least one of these permissions: {permission_names}"
+            )
+        return current_user
+
+    return permission_checker

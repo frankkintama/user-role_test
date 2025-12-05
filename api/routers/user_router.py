@@ -87,7 +87,7 @@ def assign_role_to_user_endpoint(
         missing_ids = set(user_ids) - found_ids
         raise HTTPException(status_code=404, detail=f"Users not found: {list(missing_ids)}")
     
-    role = assign_users_with_role(db, role, role_id, user_ids)
+    role = assign_users_with_role(db, role, user_ids)
     return {
         "message": f"Successfully assigned role to users {user_ids}",
     }
@@ -104,7 +104,8 @@ def remove_role_from_users_endpoint(
     role = get_role(db, role_id)
     if not role:
         raise HTTPException(status_code=404, detail="Role not found")
-    role = remove_role_from_users(db, role, role_id, user_ids)
+    
+    role = remove_role_from_users(db, role, user_ids)
     return {
         "message": f"Successfully removed role from from users {user_ids}"
     }
@@ -117,4 +118,3 @@ def get_role_by_users_endpoint(role_id: UUID, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Role not found")
     users = get_users_by_role(db, role)
     return users
-

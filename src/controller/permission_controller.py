@@ -47,27 +47,24 @@ def delete_permission(db: Session, permission: Permission) -> None:
     db.commit()
 
 
-def assign_permissions_to_role(db: Session, role: Role, role_id: UUID, permission_ids: List[UUID]) -> Role:
+def assign_permissions_to_role(db: Session, role: Role, permission_ids: List[UUID]) -> Role:
     for permission_id in permission_ids:
         existing = db.query(RolePermission).filter(
-            RolePermission.role_id == role_id,
+            RolePermission.role_id == role.id,
             RolePermission.permission_id == permission_id
         ).first()
         
         if not existing:
-            role_permission = RolePermission(role_id=role_id, permission_id=permission_id)
+            role_permission = RolePermission(role_id=role.id, permission_id=permission_id)
         db.add(role_permission)
     
     db.commit()
-    db.refresh(role)
-    print(role.permissions)
     return role
 
 
-def remove_permissions_from_role(db: Session, role: Role, role_id: UUID, permission_ids: List[UUID]) -> Role:
-    db.query(RolePermission).filter(RolePermission.role_id == role_id, RolePermission.permission_id.in_(permission_ids)).delete() 
+def remove_permissions_from_role(db: Session, role: Role, permission_ids: List[UUID]) -> Role:
+    db.query(RolePermission).filter(RolePermission.role_id == role.id, RolePermission.permission_id.in_(permission_ids)).delete() 
     db.commit()
-    db.refresh(role)
     return role
 
 
